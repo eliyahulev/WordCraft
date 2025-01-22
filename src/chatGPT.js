@@ -1,77 +1,70 @@
 import { getAPIKey } from "./common.js"
-// Constants
-const API = {
-    CHAT: 'https://api.openai.com/v1/chat/completions',
-    MODELS: 'https://api.openai.com/v1/models',
-    USAGE: 'https://platform.openai.com/account/usage'
-};
 
-const DEFAULT_MODEL = 'gpt-4o-mini';
-const REWRITE_PROMPT = 'Rewrite the following text in a casual but slightly professional manner, ensuring correct grammar and spelling.';
+const EDIT_INSTRUCTION = "Rewrite the following text in a casual but slightly professional manner, ensuring correct grammar and spelling.";
+const CHAT_COMPLETION_EDNPOINT = "https://api.openai.com/v1/chat/completions";
+const CHAT_COMPLETION_MODEL = "gpt-4o-mini";
 
-// Helper function to make API requests
-async function makeRequest(endpoint, options = {}) {
-    const apiKey = await getAPIKey();
+const MODELS_LIST = "https://api.openai.com/v1/models";
 
-    if (!apiKey) {
-        chrome.runtime.openOptionsPage();
-        return null;
-    }
+export const USAGE_URL = "https://platform.openai.com/account/usage";
 
-    const response = await fetch(endpoint, {
-        method: options.method || 'GET',
+export async function checkAPIkey(apiKey) {
+    const res = await fetch(MODELS_LIST, {
+        method: "GET",
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`
-        },
-        body: options.body ? JSON.stringify(options.body) : undefined
-    });
-
-    return response.json();
-}
-
-// Check if API key is valid
-async function checkAPIkey(apiKey) {
-    try {
-        const response = await makeRequest(API.MODELS);
-        return !response.error;
-    } catch {
-        return false;
-    }
-}
-
-// Send message to ChatGPT
-async function sendMessage(messages, model = DEFAULT_MODEL) {
-    return makeRequest(API.CHAT, {
-        method: 'POST',
-        body: {
-            model,
-            messages
+            'Authorization': 'Bearer ' + apiKey
         }
     });
+    const json = await res.json();
+    if (json.error) {
+        return false;
+    }
+    return true;
 }
 
-// Rewrite text using ChatGPT
-async function rewriteText(input) {
-    const messages = [
-        { role: 'user', content: REWRITE_PROMPT },
-        { role: 'user', content: input }
-    ];
-    return sendMessage(messages);
+async function chatGPT(api, body) {
+    const apiKey = await getAPIKey();
+    if (apiKey != null && apiKey != "") {
+        const res = await fetch(api, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + apiKey
+            },
+            body: JSON.stringify(body)
+        });
+        return await res.json();
+    } else {
+        chrome.runtime.openOptionsPage();
+    }
+    return null;
 }
 
-// Ask ChatGPT a question
-async function askChatGPT(input) {
-    const messages = [
-        { role: 'user', content: input }
-    ];
-    return sendMessage(messages);
+export async function rewriteText(input) {
+    return await chatGPT(CHAT_COMPLETION_EDNPOINT, {
+        "model": CHAT_COMPLETION_MODEL,
+        "messages": [
+            {
+                "role": "user",
+                "content": EDIT_INSTRUCTION
+            },
+            {
+                "role": "user",
+                "content": input
+            }
+        ]
+    });
 }
 
-// Export functions and constants
-export {
-    API,
-    checkAPIkey,
-    rewriteText,
-    askChatGPT
-};
+export async function askChatGPT(input) {
+    return await chatGPT(CHAT_COMPLETION_EDNPOINT, {
+        "model": CHAT_COMPLETION_MODEL,
+        "messages": [
+            {
+                "role": "user",
+                "content": input
+            }
+        ]
+    });
+}
