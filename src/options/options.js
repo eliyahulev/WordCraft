@@ -1,5 +1,5 @@
-import {getAPIKey} from "../common.js"
-import {checkAPIkey} from '../chatGPT.js'
+import { getAPIKey } from "../common.js"
+import { checkAPIkey } from '../chatGPT.js'
 
 const saveOptions = () => {
     const apiKey = document.getElementById('api_key').value;
@@ -7,7 +7,7 @@ const saveOptions = () => {
     const saveButton = document.getElementById('save');
     const successContainer = document.getElementById('successContainer');
     const errorContainer = document.getElementById('errorContainer');
-    
+
     saveButton.disabled = true;
     loading.classList.remove("hidden");
 
@@ -21,7 +21,7 @@ const saveOptions = () => {
                     successContainer.classList.remove("hidden");
                     setTimeout(() => successContainer.classList.add("hidden"), 5000);
                 }
-            );        
+            );
         } else {
             document.getElementById('api_key').focus();
             errorContainer.classList.remove("hidden");

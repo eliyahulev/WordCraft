@@ -1,6 +1,9 @@
 import { getAPIKey } from "./common.js"
 
+const EDIT_API_ENDPOINT = "https://api.openai.com/v1/edits";
+const EDIT_MODEL = "text-davinci-edit-001";
 const EDIT_INSTRUCTION = "Rewrite the following text in a casual but slightly professional manner, ensuring correct grammar and spelling.";
+
 const CHAT_COMPLETION_EDNPOINT = "https://api.openai.com/v1/chat/completions";
 const CHAT_COMPLETION_MODEL = "gpt-4o-mini";
 
@@ -42,6 +45,12 @@ async function chatGPT(api, body) {
 }
 
 export async function rewriteText(input) {
+    /*return await chatGPT(EDIT_API_ENDPOINT,{
+        "model":EDIT_MODEL,
+        "input":input,
+        "instruction":EDIT_INSTRUCTION
+    });*/
+
     return await chatGPT(CHAT_COMPLETION_EDNPOINT, {
         "model": CHAT_COMPLETION_MODEL,
         "messages": [
